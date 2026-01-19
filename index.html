@@ -31,11 +31,47 @@
                               background: #000;
                 }
 
-                iframe {
+                video {
                               width: 100%;
                               height: 100%;
-                              border: none;
+                              object-fit: contain;
                               background: #000;
+                }
+
+                .play-button-overlay {
+                              position: absolute;
+                              top: 50%;
+                              left: 50%;
+                              transform: translate(-50%, -50%);
+                              width: 80px;
+                              height: 80px;
+                              background: rgba(255, 255, 255, 0.8);
+                              border-radius: 50%;
+                              display: flex;
+                              align-items: center;
+                              justify-content: center;
+                              cursor: pointer;
+                              z-index: 10;
+                              transition: all 0.3s ease;
+                }
+
+                .play-button-overlay:hover {
+                              background: rgba(255, 255, 255, 1);
+                              transform: translate(-50%, -50%) scale(1.1);
+                }
+
+                .play-button-overlay::after {
+                              content: '';
+                              width: 0;
+                              height: 0;
+                              border-left: 25px solid #000;
+                              border-top: 15px solid transparent;
+                              border-bottom: 15px solid transparent;
+                              margin-left: 5px;
+                }
+
+                .play-button-overlay.hidden {
+                              display: none;
                 }
 
                 .loading {
@@ -46,7 +82,6 @@
                               text-align: center;
                               color: #fff;
                               z-index: 5;
-                              display: none;
                 }
 
                 .spinner {
@@ -69,31 +104,8 @@
                               color: #ccc;
                 }
 
-                .error {
-                              position: absolute;
-                              top: 50%;
-                              left: 50%;
-                              transform: translate(-50%, -50%);
-                              text-align: center;
-                              color: #ff6b6b;
-                              font-size: 18px;
-                              z-index: 10;
+                .loading.hidden {
                               display: none;
-                }
-
-                .fallback-button {
-                              margin-top: 20px;
-                              padding: 12px 24px;
-                              background: #fff;
-                              color: #000;
-                              border: none;
-                              border-radius: 4px;
-                              font-size: 16px;
-                              cursor: pointer;
-                }
-
-                .fallback-button:hover {
-                              background: #f0f0f0;
                 }
             </style>
   </head>
@@ -104,51 +116,77 @@
                                 <div class="loading-text">Loading video...</div>div>
                   </div>div>
 
-                  <div class="error" id="error"></div>div>
+                  <div class="play-button-overlay" id="playButton"></div>div>
 
-                  <!-- Embedded Dropbox video player -->
-                  <iframe 
-                                src="https://www.dropbox.com/scl/fi/hlfdt0v4cq4pio2iwjs48/Kaiya-s-Sweet-Sixteen-Secret-Dinner-Menu-Reveal.mp4?rlkey=jax6lnto94dxzh4p3rm65se3d&raw=1"
-                                allow="autoplay"
-                                allowfullscreen
-                                id="videoFrame">
-                  </iframe>iframe>
+                  <!-- Direct video element with autoplay muted -->
+                  <video 
+                                id="videoPlayer" 
+                                controls 
+                                autoplay 
+                                muted
+                                playsinline
+                                controlsList="nodownload"
+                                preload="auto">
+                                <source src="https://dl.dropboxusercontent.com/scl/fi/hlfdt0v4cq4pio2iwjs48/Kaiya-s-Sweet-Sixteen-Secret-Dinner-Menu-Reveal.mp4?rlkey=jax6lnto94dxzh4p3rm65se3d&dl=1" type="video/mp4">
+                                Your browser does not support the video tag.
+                  </video>video>
         </div>div>
 
         <script>
-                  // Show loading on page load
+                  const video = document.getElementById('videoPlayer');
+                  const playButton = document.getElementById('playButton');
                   const loading = document.getElementById('loading');
-                  const error = document.getElementById('error');
-                  const iframe = document.getElementById('videoFrame');
 
-                  // Show loading
-                  loading.style.display = 'block';
+                  // Auto-unmute on first user interaction (tap/click)
+                  document.addEventListener('click', function unmute() {
+                                video.muted = false;
+                                playButton.classList.add('hidden');
+                                document.removeEventListener('click', unmute);
+                  }, { once: true });
 
-                  // Hide loading after 3 seconds (video should load by then)
+                  // Hide play button and loading when video plays
+                  video.addEventListener('play', function() {
+                                playButton.classList.add('hidden');
+                                loading.classList.add('hidden');
+                  });
+
+                  // Show loading when waiting for data
+                  video.addEventListener('waiting', function() {
+                                loading.classList.remove('hidden');
+                  });
+
+                  // Hide loading when can play
+                  video.addEventListener('canplay', function() {
+                                loading.classList.add('hidden');
+                  });
+
+                  // Play on play button click
+                  playButton.addEventListener('click', function(e) {
+                                e.stopPropagation();
+                                video.muted = false;
+                                video.play();
+                                playButton.classList.add('hidden');
+                  });
+
+                  // Force autoplay with sound fallback after 1 second
                   setTimeout(function() {
-                                loading.style.display = 'none';
-                  }, 3000);
+                                video.muted = false;
+                                video.play().catch(function(error) {
+                                                  console.log('Autoplay with sound failed, keeping muted:', error);
+                                                  video.muted = true;
+                                                  video.play();
+                                });
+                  }, 1000);
 
-                  // Handle iframe load
-                  iframe.addEventListener('load', function() {
-                                loading.style.display = 'none';
-                                error.style.display = 'none';
-                  });
-
-                  // Handle errors
-                  iframe.addEventListener('error', function() {
-                                loading.style.display = 'none';
-                                error.style.display = 'block';
-                                error.innerHTML = '<div>Unable to load video. Please try refreshing the page.</div>';
-                  });
-
-                  // Attempt to open in fullscreen on load for kiosk mode
+                  // Attempt fullscreen on load
                   window.addEventListener('load', function() {
-                                if (document.documentElement.requestFullscreen && !document.fullscreenElement) {
-                                                  document.documentElement.requestFullscreen().catch(err => {
-                                                                        console.log('Fullscreen request unavailable');
-                                                  });
-                                }
+                                setTimeout(function() {
+                                                  if (document.documentElement.requestFullscreen && !document.fullscreenElement) {
+                                                                        document.documentElement.requestFullscreen().catch(err => {
+                                                                                                  console.log('Fullscreen unavailable');
+                                                                        });
+                                                  }
+                                }, 500);
                   });
         </script>
   </body>
