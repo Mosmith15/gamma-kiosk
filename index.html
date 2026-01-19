@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+  <head>
+        <style>
+                  body, html {
+                                margin: 0;
+                                height: 100%;
+                                overflow: hidden;
+                  }
+                  iframe {
+                                width: 100%;
+                                height: 100%;
+                                border: none;
+                  }
+              </style>
+        <script>
+                  let gammaUrl = 'https://gamma.app/docs/Kaiyas-Secret-Garden-sarn63ahs5p5rhu?plays=1';
+                  let slide = 0;
+                  const totalSlides = 10;
+
+                  function updateSlide() {
+                                gammaUrl = 'https://gamma.app/docs/Kaiyas-Secret-Garden-sarn63ahs5p5rhu?plays=1#card-' + slide;
+                                document.getElementById('gamma').src = gammaUrl;
+                                slide = (slide + 1) % totalSlides;
+                  }
+
+                  window.addEventListener('load', function() {
+                                updateSlide();
+                                setInterval(updateSlide, 7000);
+                  });
+        </script>
+  </head>
+  <body>
+        <iframe id="gamma" src="about:blank"></iframe>iframe>
+  </body>
+</html>
+  </body>
+        </script>
+        </style>
+  </head>
+</html>
