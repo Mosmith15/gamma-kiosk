@@ -19,7 +19,7 @@
                               font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
                 }
 
-                .video-container {
+                .video-wrapper {
                               position: absolute;
                               top: 0;
                               left: 0;
@@ -31,10 +31,10 @@
                               background: #000;
                 }
 
-                video {
+                iframe {
                               width: 100%;
                               height: 100%;
-                              object-fit: contain;
+                              border: none;
                               background: #000;
                 }
 
@@ -45,7 +45,8 @@
                               transform: translate(-50%, -50%);
                               text-align: center;
                               color: #fff;
-                              z-index: 10;
+                              z-index: 5;
+                              display: none;
                 }
 
                 .spinner {
@@ -68,67 +69,87 @@
                               color: #ccc;
                 }
 
-                /* Fullscreen styles */
-                video:fullscreen {
-                              width: 100%;
-                              height: 100%;
+                .error {
+                              position: absolute;
+                              top: 50%;
+                              left: 50%;
+                              transform: translate(-50%, -50%);
+                              text-align: center;
+                              color: #ff6b6b;
+                              font-size: 18px;
+                              z-index: 10;
+                              display: none;
                 }
 
-                /* Hide controls on mobile - they appear on hover/tap */
-                @media (max-width: 768px) {
-                              video {
-                                                max-width: 100vw;
-                                                max-height: 100vh;
-                              }
+                .fallback-button {
+                              margin-top: 20px;
+                              padding: 12px 24px;
+                              background: #fff;
+                              color: #000;
+                              border: none;
+                              border-radius: 4px;
+                              font-size: 16px;
+                              cursor: pointer;
+                }
+
+                .fallback-button:hover {
+                              background: #f0f0f0;
                 }
             </style>
   </head>
   <body>
-        <div class="video-container">
+        <div class="video-wrapper">
                   <div class="loading" id="loading">
                                 <div class="spinner"></div>div>
                                 <div class="loading-text">Loading video...</div>div>
                   </div>div>
-                  <video 
-                                id="videoPlayer" 
-                                controls 
-                                autoplay 
-                                playsinline
-                                controlsList="nodownload"
-                                poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1920 1080'%3E%3Crect fill='%23000' width='1920' height='1080'/%3E%3C/svg%3E">
-                                <source src="https://dl.dropboxusercontent.com/scl/fi/hlfdt0v4cq4pio2iwjs48/Kaiya-s-Sweet-Sixteen-Secret-Dinner-Menu-Reveal.mp4?rlkey=jax6lnto94dxzh4p3rm65se3d&dl=1" type="video/mp4">
-                                Your browser does not support the video tag.
-                  </video>video>
+
+                  <div class="error" id="error"></div>div>
+
+                  <!-- Embedded Dropbox video player -->
+                  <iframe 
+                                src="https://www.dropbox.com/scl/fi/hlfdt0v4cq4pio2iwjs48/Kaiya-s-Sweet-Sixteen-Secret-Dinner-Menu-Reveal.mp4?rlkey=jax6lnto94dxzh4p3rm65se3d&raw=1"
+                                allow="autoplay"
+                                allowfullscreen
+                                id="videoFrame">
+                  </iframe>iframe>
         </div>div>
 
         <script>
-                  // Hide loading when video starts playing
-                  const video = document.getElementById('videoPlayer');
+                  // Show loading on page load
                   const loading = document.getElementById('loading');
+                  const error = document.getElementById('error');
+                  const iframe = document.getElementById('videoFrame');
 
-                  video.addEventListener('play', function() {
-                                loading.style.display = 'none';
-                  });
+                  // Show loading
+                  loading.style.display = 'block';
 
-                  video.addEventListener('error', function() {
-                                loading.innerHTML = '<div style="color: #ff6b6b; font-size: 18px;">Unable to load video. Please check your connection.</div>';
-                  });
-
-                  // Handle fullscreen on mobile
-                  document.addEventListener('click', function() {
-                                if (video.paused) {
-                                                  video.play();
-                                }
-                  });
-
-                  // Attempt to enter fullscreen on load (mobile devices may deny this)
+                  // Hide loading after 3 seconds (video should load by then)
                   setTimeout(function() {
-                                if (video.requestFullscreen && !video.fullscreenElement) {
-                                                  video.requestFullscreen().catch(err => {
-                                                                        console.log('Fullscreen request denied:', err);
+                                loading.style.display = 'none';
+                  }, 3000);
+
+                  // Handle iframe load
+                  iframe.addEventListener('load', function() {
+                                loading.style.display = 'none';
+                                error.style.display = 'none';
+                  });
+
+                  // Handle errors
+                  iframe.addEventListener('error', function() {
+                                loading.style.display = 'none';
+                                error.style.display = 'block';
+                                error.innerHTML = '<div>Unable to load video. Please try refreshing the page.</div>';
+                  });
+
+                  // Attempt to open in fullscreen on load for kiosk mode
+                  window.addEventListener('load', function() {
+                                if (document.documentElement.requestFullscreen && !document.fullscreenElement) {
+                                                  document.documentElement.requestFullscreen().catch(err => {
+                                                                        console.log('Fullscreen request unavailable');
                                                   });
                                 }
-                  }, 500);
+                  });
         </script>
   </body>
 </html>html>
