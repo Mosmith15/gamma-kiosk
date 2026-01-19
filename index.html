@@ -3,26 +3,310 @@
   <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Gamma Presentation Kiosk</title>
+        <title>Secret Garden Menu - Animated Gate Entrance</title>
       <style>
-                body {
+                * {
                               margin: 0;
                               padding: 0;
+                              box-sizing: border-box;
+                }
+
+                body {
+                              font-family: 'Georgia', serif;
+                              overflow: hidden;
+                              background: #228B22;
+                }
+
+                .scene {
+                              position: relative;
                               width: 100vw;
                               height: 100vh;
+                              display: flex;
+                              align-items: center;
+                              justify-content: center;
+                              perspective: 1000px;
+                }
+
+                /* Garden Background */
+                .garden-bg {
+                              position: absolute;
+                              top: 0;
+                              left: 0;
+                              width: 100%;
+                              height: 100%;
+                              background: linear-gradient(135deg, #1a472a 0%, #2d5a3d 50%, #3d7a52 100%);
+                              opacity: 0;
+                              animation: fadeInBg 2s 2.5s forwards;
+                              z-index: 1;
+                }
+
+                /* Garden decorative elements */
+                .garden-overlay {
+                              position: absolute;
+                              top: 0;
+                              left: 0;
+                              width: 100%;
+                              height: 100%;
+                              background: 
+                                                radial-gradient(circle at 20% 80%, rgba(139, 69, 19, 0.1) 0%, transparent 50%),
+                                                radial-gradient(circle at 80% 20%, rgba(139, 69, 19, 0.1) 0%, transparent 50%);
+                              opacity: 0;
+                              animation: fadeInBg 2s 2.5s forwards;
+                              z-index: 2;
+                }
+
+                /* Gate Container */
+                .gate-container {
+                              position: absolute;
+                              top: 50%;
+                              left: 50%;
+                              transform: translate(-50%, -50%);
+                              width: 90vw;
+                              height: 70vh;
+                              max-width: 800px;
+                              max-height: 600px;
+                              z-index: 10;
+                }
+
+                /* Left Gate */
+                .gate-left {
+                              position: absolute;
+                              left: 0;
+                              top: 0;
+                              width: 50%;
+                              height: 100%;
+                              background: linear-gradient(90deg, #8B4513 0%, #A0522D 50%, #8B4513 100%);
+                              border: 3px solid #654321;
+                              border-right: none;
+                              border-radius: 8px 0 0 8px;
+                              box-shadow: inset -20px 0 30px rgba(0, 0, 0, 0.3), -10px 0 20px rgba(0, 0, 0, 0.5);
+                              transform-origin: right center;
+                              animation: gateOpenLeft 3s ease-in-out forwards;
+                              opacity: 0;
+                              animation-delay: 0s;
+                }
+
+                /* Right Gate */
+                .gate-right {
+                              position: absolute;
+                              right: 0;
+                              top: 0;
+                              width: 50%;
+                              height: 100%;
+                              background: linear-gradient(270deg, #8B4513 0%, #A0522D 50%, #8B4513 100%);
+                              border: 3px solid #654321;
+                              border-left: none;
+                              border-radius: 0 8px 8px 0;
+                              box-shadow: inset 20px 0 30px rgba(0, 0, 0, 0.3), 10px 0 20px rgba(0, 0, 0, 0.5);
+                              transform-origin: left center;
+                              animation: gateOpenRight 3s ease-in-out forwards;
+                              opacity: 0;
+                              animation-delay: 0s;
+                }
+
+                /* Gate decorative elements */
+                .gate-left::before,
+                .gate-right::before {
+                              content: '';
+                              position: absolute;
+                              width: 20px;
+                              height: 60%;
+                              background: radial-gradient(circle at 30% 50%, #FFD700, #DAA520);
+                              border-radius: 50%;
+                              top: 20%;
+                              left: 50%;
+                              transform: translateX(-50%);
+                              box-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
+                }
+
+                /* Menu Card */
+                .menu-card {
+                              position: absolute;
+                              top: 50%;
+                              left: 50%;
+                              transform: translate(-50%, -50%) scale(0.8);
+                              background: rgba(255, 255, 255, 0.95);
+                              padding: 40px;
+                              border-radius: 12px;
+                              box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+                              text-align: center;
+                              max-width: 500px;
+                              width: 85%;
+                              opacity: 0;
+                              animation: revealMenu 1.2s 3.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+                              z-index: 20;
+                }
+
+                .menu-card h1 {
+                              font-size: clamp(24px, 6vw, 48px);
+                              color: #2d5a3d;
+                              margin-bottom: 15px;
+                              letter-spacing: 2px;
+                              font-weight: normal;
+                }
+
+                .menu-card p {
+                              font-size: clamp(14px, 3vw, 18px);
+                              color: #555;
+                              line-height: 1.6;
+                              margin-bottom: 20px;
+                }
+
+                .menu-card .subtitle {
+                              font-size: clamp(12px, 2.5vw, 16px);
+                              color: #8B4513;
+                              font-style: italic;
+                              margin-top: 10px;
+                }
+
+                /* Menu Image Container */
+                .menu-image {
+                              width: 100%;
+                              max-width: 100%;
+                              margin-top: 20px;
+                              border-radius: 8px;
                               overflow: hidden;
+                              box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+                }
+
+                .menu-image img {
+                              width: 100%;
+                              height: auto;
+                              display: block;
+                }
+
+                /* Decorative flourishes */
+                .flourish {
+                              position: absolute;
+                              font-size: clamp(20px, 5vw, 40px);
+                              opacity: 0;
+                              animation: fadeInFourish 1s 4s forwards;
+                }
+
+                .flourish-top {
+                              top: 10%;
+                              left: 50%;
+                              transform: translateX(-50%);
+                }
+
+                .flourish-bottom {
+                              bottom: 10%;
+                              left: 50%;
+                              transform: translateX(-50%);
+                              animation-delay: 4.2s;
+                }
+
+                /* Keyframe Animations */
+                @keyframes gateOpenLeft {
+                              0% {
+                                                transform: rotateY(0deg);
+                                                opacity: 1;
+                              }
+                              100% {
+                                                transform: rotateY(-110deg);
+                                                opacity: 1;
+                              }
+                }
+
+                @keyframes gateOpenRight {
+                              0% {
+                                                transform: rotateY(0deg);
+                                                opacity: 1;
+                              }
+                              100% {
+                                                transform: rotateY(110deg);
+                                                opacity: 1;
+                              }
+                }
+
+                @keyframes fadeInBg {
+                              to {
+                                                opacity: 1;
+                              }
+                }
+
+                @keyframes revealMenu {
+                              0% {
+                                                opacity: 0;
+                                                transform: translate(-50%, -50%) scale(0.7) rotateY(20deg);
+                              }
+                              100% {
+                                                opacity: 1;
+                                                transform: translate(-50%, -50%) scale(1) rotateY(0deg);
+                              }
+                }
+
+                @keyframes fadeInFourish {
+                              0% {
+                                                opacity: 0;
+                                                transform: translateX(-50%) translateY(-20px);
+                              }
+                              100% {
+                                                opacity: 0.6;
+                                                transform: translateX(-50%) translateY(0);
+                              }
+                }
+
+                /* Responsive Design */
+                @media (max-width: 768px) {
+                              .menu-card {
+                                                padding: 30px 20px;
+                              }
+
+                              .gate-container {
+                                                height: 60vh;
+                              }
+
+                              .menu-card h1 {
+                                                margin-bottom: 12px;
+                              }
+                }
+
+                @media (max-width: 480px) {
+                              .gate-container {
+                                                height: 50vh;
+                              }
+
+                              .menu-card {
+                                                padding: 20px 15px;
+                              }
+
+                              .flourish {
+                                                display: none;
+                              }
                 }
             </style>
   </head>
   <body>
-        <script>
-                  // Redirect directly to the Gamma presentation in presentation mode
-                  // This is the most reliable method for kiosk displays
-                  window.location.href = 'https://gamma.app/docs/Kaiyas-Secret-Garden-sarn63ahs5p5rhu?plays=1';
-        </script>
+        <div class="scene">
+                  <!-- Background -->
+                  <div class="garden-bg"></div>div>
+                  <div class="garden-overlay"></div>div>
+
+                  <!-- Animated Gates -->
+                  <div class="gate-container">
+                                <div class="gate-left"></div>div>
+                                <div class="gate-right"></div>div>
+
+                                <!-- Menu Content -->
+                                <div class="menu-card">
+                                                  <h1>✨ Kaiya's Secret Garden ✨</h1>
+                                                <p>An Enchanted Dining Experience</p>
+                                                <p class="subtitle">Step through the garden gates and discover tonight's culinary treasures</p>
+                                                
+                                                <!-- Menu Image - Replace with your own image URL -->
+                                                <div class="menu-image">
+                                                                    <img src="https://via.placeholder.com/400x300?text=Dinner+Menu" alt="Dinner Menu" loading="lazy">
+                                                </div>div>
+                                </div>div>
+                  </div>div>
+        
+                <!-- Decorative Elements -->
+                <div class="flourish flourish-top">🌸</div>div>
+                <div class="flourish flourish-bottom">🌿</div>div>
+        </div>div>
   </body>
-</html>html>
-        </script>
+</html>html></p></h1>
   </body>
       </style></title>
   </head>
